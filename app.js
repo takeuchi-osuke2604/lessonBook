@@ -34,12 +34,17 @@ const studentList = document.getElementById("student-list");
 const plannedAttendanceList = document.getElementById("planned-attendance-list");
 const absentAttendanceList = document.getElementById("absent-attendance-list");
 const attendanceSummary = document.getElementById("attendance-summary");
+const tomorrowSummary = document.getElementById("tomorrow-summary");
+const tomorrowDateLabel = document.getElementById("tomorrow-date-label");
+const tomorrowReservationList = document.getElementById("tomorrow-reservation-list");
 const monthLabel = document.getElementById("month-label");
 const dateGrid = document.getElementById("date-grid");
 const selectedDateLabel = document.getElementById("selected-date-label");
 const reservationStudentList = document.getElementById("reservation-student-list");
 const saveReservationBtn = document.getElementById("save-reservation-btn");
 const monthNavButtons = document.querySelectorAll(".month-nav");
+const modeButtons = document.querySelectorAll(".mode-btn");
+const studentDateSummary = document.getElementById("student-date-summary");
 const prevDayBtn = document.getElementById("prev-day-btn");
 const nextDayBtn = document.getElementById("next-day-btn");
 const attendanceDateLabel = document.getElementById("attendance-date-label");
@@ -48,6 +53,8 @@ const today = new Date();
 let currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 let attendanceDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+let reservationMode = "student";
+let selectedStudentId = students[0] ? students[0].id : null;
 
 let reservations = loadStorage(STORAGE_KEYS.reservations, {});
 let attendance = loadStorage(STORAGE_KEYS.attendance, {});
@@ -98,13 +105,13 @@ function formatAttendanceDateLabel(date) {
     tomorrow.setDate(todayDate.getDate() + 1);
 
     if (getDateKey(date) === getDateKey(todayDate)) {
-        return "今日";
+        return `今日 (${formatDateLabel(date)})`;
     }
     if (getDateKey(date) === getDateKey(yesterday)) {
-        return "前日";
+        return `前日 (${formatDateLabel(date)})`;
     }
     if (getDateKey(date) === getDateKey(tomorrow)) {
-        return "翌日";
+        return `翌日 (${formatDateLabel(date)})`;
     }
 
     return formatDateLabel(date);
@@ -130,6 +137,7 @@ function renderStudents() {
 function renderAttendance() {
     if (!plannedAttendanceList || !absentAttendanceList || !attendanceSummary || !attendanceDateLabel) return;
 
+    const attendanceColumns = document.querySelector(".attendance-columns");
     const attendanceKey = getDateKey(attendanceDate);
     const reservedStudentIds = reservations[attendanceKey] || [];
     const attendanceForSelectedDay = attendance[attendanceKey] || {};
@@ -144,14 +152,59 @@ function renderAttendance() {
         ? `出席予定 ${plannedCount}名 / 欠席 ${absentCount}名`
         : "予約はありません。";
 
+    if (attendanceColumns) {
+        attendanceColumns.style.display = reservedStudentIds.length ? "grid" : "none";
+    }
+
+    const tomorrowDate = new Date(attendanceDate);
+    tomorrowDate.setDate(attendanceDate.getDate() + 1);
+    const tomorrowKey = getDateKey(tomorrowDate);
+    const tomorrowReservedStudentIds = reservations[tomorrowKey] || [];
+    const tomorrowAttendanceForSelectedDay = attendance[tomorrowKey] || {};
+    const tomorrowPlannedCount = tomorrowReservedStudentIds.filter((studentId) => {
+        const status = tomorrowAttendanceForSelectedDay[studentId];
+        return status !== "欠席" && status !== "出席";
+    }).length;
+    const tomorrowAbsentCount = tomorrowReservedStudentIds.filter((studentId) => tomorrowAttendanceForSelectedDay[studentId] === "欠席").length;
+
+    if (tomorrowDateLabel) {
+        tomorrowDateLabel.textContent = formatDateLabel(tomorrowDate);
+    }
+
+    if (tomorrowSummary) {
+        tomorrowSummary.textContent = tomorrowReservedStudentIds.length
+            ? `明日の予約: 出席予定 ${tomorrowPlannedCount}名 / 欠席 ${tomorrowAbsentCount}名`
+            : "明日の予約はありません。";
+    }
+
+    if (tomorrowReservationList) {
+        tomorrowReservationList.innerHTML = "";
+
+        tomorrowReservedStudentIds.forEach((studentId) => {
+            const student = getStudentById(studentId);
+            if (!student) return;
+
+            const status = tomorrowAttendanceForSelectedDay[studentId] === "欠席" ? "欠席" : "出席予定";
+            const item = document.createElement("li");
+            item.className = "student-item tomorrow-item";
+
+            const name = document.createElement("span");
+            name.textContent = student.name;
+
+            const statusBadge = document.createElement("span");
+            statusBadge.className = `attendance-status ${status === "欠席" ? "absent" : "planned"}`;
+            statusBadge.textContent = status;
+
+            item.appendChild(name);
+            item.appendChild(statusBadge);
+            tomorrowReservationList.appendChild(item);
+        });
+    }
+
     plannedAttendanceList.innerHTML = "";
     absentAttendanceList.innerHTML = "";
 
     if (!reservedStudentIds.length) {
-        const emptyItem = document.createElement("li");
-        emptyItem.className = "student-item";
-        emptyItem.textContent = "予約者がまだいません。";
-        plannedAttendanceList.appendChild(emptyItem);
         return;
     }
 
@@ -233,6 +286,7 @@ function renderReservationCalendar() {
         const cellDate = new Date(startDate);
         cellDate.setDate(startDate.getDate() + dayIndex);
 
+        const dateKey = getDateKey(cellDate);
         const dateButton = document.createElement("button");
         dateButton.type = "button";
         dateButton.className = "date-cell";
@@ -242,17 +296,36 @@ function renderReservationCalendar() {
             dateButton.classList.add("outside-month");
         }
 
-        const dateKey = getDateKey(cellDate);
         const todayKey = getDateKey(today);
         if (dateKey === todayKey) {
             dateButton.classList.add("today");
         }
 
-        if (dateKey === getDateKey(selectedDate)) {
+        if (reservationMode === "student") {
+            const studentDateIds = new Set((draftReservations[dateKey] || []).map(Number));
+            if (studentDateIds.has(selectedStudentId)) {
+                dateButton.classList.add("selected");
+            }
+        } else if (dateKey === getDateKey(selectedDate)) {
             dateButton.classList.add("selected");
         }
 
         dateButton.addEventListener("click", () => {
+            if (reservationMode === "student") {
+                const dateValue = draftReservations[dateKey] || [];
+                const nextIds = new Set(dateValue);
+                if (nextIds.has(selectedStudentId)) {
+                    nextIds.delete(selectedStudentId);
+                } else {
+                    nextIds.add(selectedStudentId);
+                }
+
+                draftReservations[dateKey] = Array.from(nextIds).sort((left, right) => left - right);
+                renderReservationCalendar();
+                renderReservationDetail();
+                return;
+            }
+
             selectedDate = new Date(cellDate);
             currentMonth = new Date(cellDate.getFullYear(), cellDate.getMonth(), 1);
             renderReservationCalendar();
@@ -266,9 +339,55 @@ function renderReservationCalendar() {
 function renderReservationDetail() {
     if (!selectedDateLabel || !reservationStudentList) return;
 
+    const currentStudent = students.find((student) => student.id === selectedStudentId) || students[0];
+
+    if (reservationMode === "student") {
+        selectedDateLabel.textContent = `生徒指定: ${currentStudent ? currentStudent.name : "未選択"}`;
+        reservationStudentList.innerHTML = "";
+
+        if (studentDateSummary) {
+            const selectedDates = Object.entries(draftReservations)
+                .filter(([, ids]) => ids.includes(selectedStudentId))
+                .map(([dateKey]) => dateKey)
+                .sort();
+
+            studentDateSummary.textContent = selectedDates.length
+                ? `選択中の生徒: ${currentStudent.name} / 予約日数: ${selectedDates.length}日`
+                : `${currentStudent ? currentStudent.name : "選択中の生徒"} の予約日はまだありません。`;
+        }
+
+        const selectWrap = document.createElement("label");
+        selectWrap.className = "reservation-row";
+        selectWrap.textContent = "生徒：";
+
+        const studentSelect = document.createElement("select");
+        studentSelect.className = "reservation-student-select";
+        students.forEach((student) => {
+            const option = document.createElement("option");
+            option.value = String(student.id);
+            option.textContent = student.name;
+            option.selected = student.id === selectedStudentId;
+            studentSelect.appendChild(option);
+        });
+
+        studentSelect.addEventListener("change", (event) => {
+            selectedStudentId = Number(event.target.value);
+            renderReservationCalendar();
+            renderReservationDetail();
+        });
+
+        selectWrap.appendChild(studentSelect);
+        reservationStudentList.appendChild(selectWrap);
+        return;
+    }
+
     const dateKey = getDateKey(selectedDate);
     const reservedIds = new Set((draftReservations[dateKey] || []).map(Number));
     selectedDateLabel.textContent = `${formatDateLabel(selectedDate)} の予約`;
+
+    if (studentDateSummary) {
+        studentDateSummary.textContent = "";
+    }
 
     reservationStudentList.innerHTML = "";
 
@@ -307,6 +426,15 @@ monthNavButtons.forEach((button) => {
         const monthIncrement = action === "prev-month" ? -1 : 1;
         currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + monthIncrement, 1);
         selectedDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+        renderReservationCalendar();
+        renderReservationDetail();
+    });
+});
+
+modeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        reservationMode = button.dataset.mode;
+        modeButtons.forEach((item) => item.classList.toggle("active", item === button));
         renderReservationCalendar();
         renderReservationDetail();
     });

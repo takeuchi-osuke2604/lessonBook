@@ -1,85 +1,103 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>習い事教室</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>習い事教室</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-  <div class="app">
+    <div class="app">
 
-    <header class="header">
-      <h1>習い事教室</h1>
+        <header class="header">
+            <h1>習い事教室</h1>
 
-      <nav class="tabs">
-        <button class="tab active" data-screen="attendance">
-          本日の出欠
-        </button>
+            <nav class="tabs">
+                <button class="tab active" data-screen="attendance">
+                    本日の出欠
+                </button>
 
-        <button class="tab" data-screen="reservation">
-          予約管理
-        </button>
-      </nav>
-    </header>
-
-
-    <main>
-
-      <!-- 本日の出欠 -->
-      <section id="attendance" class="screen active">
-        <h2>本日の出欠</h2>
-
-        <div class="attendance-panel">
-          <div class="attendance-nav">
-            <button type="button" id="prev-day-btn" class="day-nav-btn">前日</button>
-            <h3 id="attendance-date-label">今日</h3>
-            <button type="button" id="next-day-btn" class="day-nav-btn">翌日</button>
-          </div>
-
-          <p id="attendance-summary" class="attendance-summary"></p>
-
-          <div class="attendance-columns">
-            <div class="attendance-column">
-              <h4>出席予定</h4>
-              <ul id="planned-attendance-list" class="attendance-list"></ul>
-            </div>
-
-            <div class="attendance-column">
-              <h4>欠席</h4>
-              <ul id="absent-attendance-list" class="attendance-list"></ul>
-            </div>
-          </div>
-        </div>
-      </section>
+                <button class="tab" data-screen="reservation">
+                    予約管理
+                </button>
+            </nav>
+        </header>
 
 
-      <!-- 予約管理 -->
-      <section id="reservation" class="screen">
-        <h2>予約管理（一括予約）</h2>
+        <main>
 
-        <div class="reservation-panel">
-          <div class="reservation-header">
-            <button type="button" class="month-nav" data-action="prev-month">前月</button>
-            <h3 id="month-label">2026年9月</h3>
-            <button type="button" class="month-nav" data-action="next-month">翌月</button>
-          </div>
+            <!-- 本日の出欠 -->
+            <section id="attendance" class="screen active">
+                <h2>本日の出欠</h2>
 
-          <div id="date-grid" class="date-grid"></div>
+                <div class="attendance-panel">
+                    <div class="attendance-nav">
+                        <button type="button" id="prev-day-btn" class="day-nav-btn">前日</button>
+                        <h3 id="attendance-date-label">今日</h3>
+                        <button type="button" id="next-day-btn" class="day-nav-btn">翌日</button>
+                    </div>
 
-          <div class="reservation-detail">
-            <h3 id="selected-date-label">選択中の日付</h3>
-            <div id="reservation-student-list" class="reservation-student-list"></div>
-            <button type="button" id="save-reservation-btn" class="primary-btn">保存</button>
-          </div>
-        </div>
-      </section>
+                    <p id="attendance-summary" class="attendance-summary"></p>
 
-    </main>
+                    <div class="attendance-columns">
+                        <div class="attendance-column">
+                            <h4>出席予定</h4>
+                            <ul id="planned-attendance-list" class="attendance-list"></ul>
+                        </div>
 
-  </div>
+                        <div class="attendance-column">
+                            <h4>欠席</h4>
+                            <ul id="absent-attendance-list" class="attendance-list"></ul>
+                        </div>
+                    </div>
+                </div>
 
-  <script src="app.js"></script>
+                <div class="reservation-panel tomorrow-panel">
+                    <div class="tomorrow-header">
+                        <h3>明日の予約</h3>
+                        <span id="tomorrow-date-label" class="tomorrow-date-label"></span>
+                    </div>
+                    <p id="tomorrow-summary" class="attendance-summary"></p>
+                    <ul id="tomorrow-reservation-list" class="reservation-list"></ul>
+                </div>
+            </section>
+
+
+            <!-- 予約管理 -->
+            <section id="reservation" class="screen">
+                <h2>予約管理</h2>
+
+                <div class="reservation-panel">
+                    <div class="reservation-header">
+                        <button type="button" class="month-nav" data-action="prev-month">前月</button>
+                        <h3 id="month-label">2026年9月</h3>
+                        <button type="button" class="month-nav" data-action="next-month">翌月</button>
+                    </div>
+
+                    <div class="reservation-mode-switch">
+                        <button type="button" class="mode-btn active" data-mode="student">生徒指定</button>
+                        <button type="button" class="mode-btn" data-mode="date">日付指定</button>
+                    </div>
+
+                    <div id="date-grid" class="date-grid"></div>
+
+                    <div class="reservation-detail">
+                        <h3 id="selected-date-label">選択中の日付</h3>
+                        <div id="reservation-student-list" class="reservation-student-list"></div>
+                        <div id="student-date-summary" class="attendance-summary"></div>
+                        <button type="button" id="save-reservation-btn" class="primary-btn">保存</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+    </div>
+
+    <script src="app.js"></script>
 </body>
+
 </html>
