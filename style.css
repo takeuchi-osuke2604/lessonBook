@@ -87,8 +87,214 @@ body {
   font-size: 20px;
 }
 
+.student-panel {
+  background: #f4f6f8;
+  border-radius: 12px;
+  padding: 16px;
+}
 
-/* 仮表示 */
+.student-panel h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.student-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.student-item {
+  background: #ffffff;
+  border: 1px solid #dfe5e8;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.attendance-panel,
+.reservation-panel {
+  margin-top: 20px;
+  background: #f4f6f8;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.attendance-panel h3,
+.reservation-panel h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.attendance-groups {
+  display: grid;
+  gap: 16px;
+}
+
+.attendance-group h4 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: #455a64;
+}
+
+.attendance-summary {
+  margin: 0 0 12px;
+  color: #455a64;
+  font-size: 14px;
+}
+
+.attendance-list,
+.reservation-student-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.attendance-item,
+.reservation-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid #dfe5e8;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.attendance-item {
+  flex-wrap: wrap;
+}
+
+.attendance-name,
+.reservation-name {
+  font-weight: 600;
+}
+
+.attendance-status {
+  display: inline-block;
+  min-width: 72px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.attendance-status.planned {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.attendance-status.present {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.attendance-status.absent {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.attendance-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.action-btn,
+.month-nav,
+.primary-btn,
+.date-cell {
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.action-btn,
+.month-nav {
+  background: #eaf0f4;
+  color: #263238;
+  padding: 7px 10px;
+}
+
+.action-btn.primary {
+  background: #1976d2;
+  color: #ffffff;
+}
+
+.action-btn.warning {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.primary-btn {
+  width: 100%;
+  margin-top: 14px;
+  background: #1976d2;
+  color: #ffffff;
+  padding: 12px;
+  font-weight: 700;
+}
+
+.reservation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.reservation-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.date-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.date-cell {
+  min-height: 42px;
+  background: #ffffff;
+  border: 1px solid #dfe5e8;
+  color: #455a64;
+  font-weight: 600;
+}
+
+.date-cell.outside-month {
+  background: #edf1f3;
+  color: #9aa5a9;
+}
+
+.date-cell.selected {
+  background: #1976d2;
+  color: #ffffff;
+}
+
+.date-cell.today {
+  border-color: #1976d2;
+}
+
+.reservation-row {
+  justify-content: flex-start;
+  padding: 10px 12px;
+}
+
+.reservation-row input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
 
 .placeholder {
   margin: 0;

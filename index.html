@@ -31,9 +31,19 @@
       <section id="attendance" class="screen active">
         <h2>本日の出欠</h2>
 
-        <p class="placeholder">
-          ここに本日の出欠を表示します。
-        </p>
+        <div class="attendance-panel">
+          <h3>今日の予約</h3>
+          <p id="attendance-summary" class="attendance-summary"></p>
+
+          <div class="attendance-groups">
+            <div class="attendance-group">
+              <h4>出席予定</h4>
+              <ul id="planned-attendance-list" class="attendance-list"></ul>
+              <h4>欠席</h4>
+              <ul id="absent-attendance-list" class="attendance-list"></ul>
+            </div>
+          </div>
+        </div>
       </section>
 
 
@@ -41,9 +51,21 @@
       <section id="reservation" class="screen">
         <h2>予約管理（一括予約）</h2>
 
-        <p class="placeholder">
-          ここに予約管理画面を表示します。
-        </p>
+        <div class="reservation-panel">
+          <div class="reservation-header">
+            <button type="button" class="month-nav" data-action="prev-month">前月</button>
+            <h3 id="month-label">2026年9月</h3>
+            <button type="button" class="month-nav" data-action="next-month">翌月</button>
+          </div>
+
+          <div id="date-grid" class="date-grid"></div>
+
+          <div class="reservation-detail">
+            <h3 id="selected-date-label">選択中の日付</h3>
+            <div id="reservation-student-list" class="reservation-student-list"></div>
+            <button type="button" id="save-reservation-btn" class="primary-btn">保存</button>
+          </div>
+        </div>
       </section>
 
     </main>
