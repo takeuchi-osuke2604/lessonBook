@@ -40,10 +40,14 @@ const selectedDateLabel = document.getElementById("selected-date-label");
 const reservationStudentList = document.getElementById("reservation-student-list");
 const saveReservationBtn = document.getElementById("save-reservation-btn");
 const monthNavButtons = document.querySelectorAll(".month-nav");
+const prevDayBtn = document.getElementById("prev-day-btn");
+const nextDayBtn = document.getElementById("next-day-btn");
+const attendanceDateLabel = document.getElementById("attendance-date-label");
 
 const today = new Date();
 let currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+let attendanceDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
 let reservations = loadStorage(STORAGE_KEYS.reservations, {});
 let attendance = loadStorage(STORAGE_KEYS.attendance, {});
@@ -86,6 +90,26 @@ function formatMonthLabel(date) {
     return `${date.getFullYear()}年${date.getMonth() + 1}月`;
 }
 
+function formatAttendanceDateLabel(date) {
+    const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const yesterday = new Date(todayDate);
+    yesterday.setDate(todayDate.getDate() - 1);
+    const tomorrow = new Date(todayDate);
+    tomorrow.setDate(todayDate.getDate() + 1);
+
+    if (getDateKey(date) === getDateKey(todayDate)) {
+        return "今日";
+    }
+    if (getDateKey(date) === getDateKey(yesterday)) {
+        return "前日";
+    }
+    if (getDateKey(date) === getDateKey(tomorrow)) {
+        return "翌日";
+    }
+
+    return formatDateLabel(date);
+}
+
 function getStudentById(studentId) {
     return students.find((student) => student.id === studentId);
 }
@@ -104,20 +128,21 @@ function renderStudents() {
 }
 
 function renderAttendance() {
-    if (!plannedAttendanceList || !absentAttendanceList || !attendanceSummary) return;
+    if (!plannedAttendanceList || !absentAttendanceList || !attendanceSummary || !attendanceDateLabel) return;
 
-    const todayKey = getDateKey(today);
-    const reservedStudentIds = reservations[todayKey] || [];
-    const attendanceForToday = attendance[todayKey] || {};
+    const attendanceKey = getDateKey(attendanceDate);
+    const reservedStudentIds = reservations[attendanceKey] || [];
+    const attendanceForSelectedDay = attendance[attendanceKey] || {};
     const plannedCount = reservedStudentIds.filter((studentId) => {
-        const status = attendanceForToday[studentId];
-        return status !== "欠席";
+        const status = attendanceForSelectedDay[studentId];
+        return status !== "欠席" && status !== "出席";
     }).length;
-    const absentCount = reservedStudentIds.filter((studentId) => attendanceForToday[studentId] === "欠席").length;
+    const absentCount = reservedStudentIds.filter((studentId) => attendanceForSelectedDay[studentId] === "欠席").length;
 
+    attendanceDateLabel.textContent = formatAttendanceDateLabel(attendanceDate);
     attendanceSummary.textContent = reservedStudentIds.length
         ? `出席予定 ${plannedCount}名 / 欠席 ${absentCount}名`
-        : "本日の予約はありません。";
+        : "予約はありません。";
 
     plannedAttendanceList.innerHTML = "";
     absentAttendanceList.innerHTML = "";
@@ -134,10 +159,13 @@ function renderAttendance() {
         const student = getStudentById(studentId);
         if (!student) return;
 
-        const status = attendanceForToday[studentId] || "予定";
-        const isAbsent = status === "欠席";
-        const statusLabel = status === "出席" ? "出席" : status === "欠席" ? "欠席" : "出席予定";
-        const statusClass = status === "出席" ? "present" : status === "欠席" ? "absent" : "planned";
+        const status = attendanceForSelectedDay[studentId];
+        if (status === "出席") {
+            return;
+        }
+
+        const normalizedStatus = status === "欠席" ? "欠席" : "出席予定";
+        const isAbsent = normalizedStatus === "欠席";
 
         const item = document.createElement("li");
         item.className = "attendance-item";
@@ -146,20 +174,19 @@ function renderAttendance() {
         name.className = "attendance-name";
         name.textContent = student.name;
 
-        const statusBadge = document.createElement("span");
-        statusBadge.className = `attendance-status ${statusClass}`;
-        statusBadge.textContent = statusLabel;
-
         const actions = document.createElement("div");
         actions.className = "attendance-actions";
 
-        const presentBtn = document.createElement("button");
-        presentBtn.type = "button";
-        presentBtn.className = "action-btn primary";
-        presentBtn.textContent = "出席";
-        presentBtn.addEventListener("click", () => {
-            attendance[todayKey] = attendance[todayKey] || {};
-            attendance[todayKey][studentId] = "出席";
+        const plannedBtn = document.createElement("button");
+        plannedBtn.type = "button";
+        plannedBtn.className = "action-btn primary";
+        plannedBtn.textContent = "出席予定にする";
+        if (normalizedStatus === "出席予定") {
+            plannedBtn.style.display = "none";
+        }
+        plannedBtn.addEventListener("click", () => {
+            attendance[attendanceKey] = attendance[attendanceKey] || {};
+            attendance[attendanceKey][studentId] = "出席予定";
             saveStorage(STORAGE_KEYS.attendance, attendance);
             renderAttendance();
         });
@@ -167,34 +194,21 @@ function renderAttendance() {
         const absentBtn = document.createElement("button");
         absentBtn.type = "button";
         absentBtn.className = "action-btn warning";
-        absentBtn.textContent = "欠席";
+        absentBtn.textContent = "欠席にする";
+        if (normalizedStatus === "欠席") {
+            absentBtn.style.display = "none";
+        }
         absentBtn.addEventListener("click", () => {
-            attendance[todayKey] = attendance[todayKey] || {};
-            attendance[todayKey][studentId] = "欠席";
+            attendance[attendanceKey] = attendance[attendanceKey] || {};
+            attendance[attendanceKey][studentId] = "欠席";
             saveStorage(STORAGE_KEYS.attendance, attendance);
             renderAttendance();
         });
 
-        const resetBtn = document.createElement("button");
-        resetBtn.type = "button";
-        resetBtn.className = "action-btn";
-        resetBtn.textContent = "戻す";
-        resetBtn.addEventListener("click", () => {
-            if (!attendance[todayKey]) return;
-            delete attendance[todayKey][studentId];
-            if (!Object.keys(attendance[todayKey]).length) {
-                delete attendance[todayKey];
-            }
-            saveStorage(STORAGE_KEYS.attendance, attendance);
-            renderAttendance();
-        });
-
-        actions.appendChild(presentBtn);
+        actions.appendChild(plannedBtn);
         actions.appendChild(absentBtn);
-        actions.appendChild(resetBtn);
 
         item.appendChild(name);
-        item.appendChild(statusBadge);
         item.appendChild(actions);
 
         if (isAbsent) {
@@ -306,6 +320,16 @@ saveReservationBtn.addEventListener("click", () => {
     window.setTimeout(() => {
         saveReservationBtn.textContent = "保存";
     }, 1000);
+});
+
+prevDayBtn.addEventListener("click", () => {
+    attendanceDate = new Date(attendanceDate.getFullYear(), attendanceDate.getMonth(), attendanceDate.getDate() - 1);
+    renderAttendance();
+});
+
+nextDayBtn.addEventListener("click", () => {
+    attendanceDate = new Date(attendanceDate.getFullYear(), attendanceDate.getMonth(), attendanceDate.getDate() + 1);
+    renderAttendance();
 });
 
 tabs.forEach((tab) => {

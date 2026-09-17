@@ -129,12 +129,36 @@ body {
   font-size: 16px;
 }
 
-.attendance-groups {
+.attendance-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.attendance-nav h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.day-nav-btn {
+  border: 0;
+  border-radius: 8px;
+  background: #eaf0f4;
+  color: #263238;
+  padding: 8px 12px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.attendance-columns {
   display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
-.attendance-group h4 {
+.attendance-column h4 {
   margin: 0 0 10px;
   font-size: 14px;
   color: #455a64;
