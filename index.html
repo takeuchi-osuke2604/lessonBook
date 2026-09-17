@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>習い事教室</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <header class="header">
+      <h1>習い事教室</h1>
+
+      <nav class="tabs">
+        <button class="tab active" data-screen="attendance">
+          本日の出欠
+        </button>
+
+        <button class="tab" data-screen="reservation">
+          予約管理（一括予約）
+        </button>
+      </nav>
+    </header>
+
+
+    <main>
+
+      <!-- 本日の出欠 -->
+      <section id="attendance" class="screen active">
+        <h2>本日の出欠</h2>
+
+        <p class="placeholder">
+          ここに本日の出欠を表示します。
+        </p>
+      </section>
+
+
+      <!-- 予約管理 -->
+      <section id="reservation" class="screen">
+        <h2>予約管理（一括予約）</h2>
+
+        <p class="placeholder">
+          ここに予約管理画面を表示します。
+        </p>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background: #f4f6f8;
+  color: #263238;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Hiragino Kaku Gothic ProN",
+    "Yu Gothic",
+    Meiryo,
+    sans-serif;
+}
+
+
+/* アプリ全体 */
+
+.app {
+  width: 100%;
+  max-width: 768px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: #ffffff;
+}
+
+
+/* ヘッダー */
+
+.header {
+  border-bottom: 1px solid #dfe5e8;
+}
+
+.header h1 {
+  margin: 0;
+  padding: 16px;
+  font-size: 20px;
+}
+
+
+/* タブ */
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.tab {
+  min-height: 52px;
+  padding: 10px;
+  border: 0;
+  border-top: 1px solid #dfe5e8;
+  background: #f1f4f6;
+  color: #607078;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: #1976d2;
+  color: #ffffff;
+}
+
+
+/* 画面 */
+
+.screen {
+  display: none;
+  padding: 20px 16px;
+}
+
+.screen.active {
+  display: block;
+}
+
+.screen h2 {
+  margin: 0 0 20px;
+  font-size: 20px;
+}
+
+
+/* 仮表示 */
+
+.placeholder {
+  margin: 0;
+  padding: 30px 16px;
+  border-radius: 10px;
+  background: #f4f6f8;
+  color: #78909c;
+  text-align: center;
+}
