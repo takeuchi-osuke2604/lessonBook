@@ -55,6 +55,7 @@ let selectedDate = new Date(today.getFullYear(), today.getMonth(), today.getDate
 let attendanceDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 let reservationMode = "student";
 let selectedStudentId = students[0] ? students[0].id : null;
+let newlyToggledDates = new Set();
 
 let reservations = loadStorage(STORAGE_KEYS.reservations, {});
 let attendance = loadStorage(STORAGE_KEYS.attendance, {});
@@ -93,6 +94,11 @@ function formatDateLabel(date) {
     return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
 }
 
+function formatDayOfWeekLabel(date) {
+    const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+    return `（${weekdays[date.getDay()]}）`;
+}
+
 function formatMonthLabel(date) {
     return `${date.getFullYear()}年${date.getMonth() + 1}月`;
 }
@@ -104,17 +110,19 @@ function formatAttendanceDateLabel(date) {
     const tomorrow = new Date(todayDate);
     tomorrow.setDate(todayDate.getDate() + 1);
 
+    const weekday = formatDayOfWeekLabel(date);
+
     if (getDateKey(date) === getDateKey(todayDate)) {
-        return `今日 (${formatDateLabel(date)})`;
+        return `今日 (${formatDateLabel(date)}) ${weekday}`;
     }
     if (getDateKey(date) === getDateKey(yesterday)) {
-        return `前日 (${formatDateLabel(date)})`;
+        return `前日 (${formatDateLabel(date)}) ${weekday}`;
     }
     if (getDateKey(date) === getDateKey(tomorrow)) {
-        return `翌日 (${formatDateLabel(date)})`;
+        return `翌日 (${formatDateLabel(date)}) ${weekday}`;
     }
 
-    return formatDateLabel(date);
+    return `${formatDateLabel(date)} ${weekday}`;
 }
 
 function getStudentById(studentId) {
@@ -301,10 +309,18 @@ function renderReservationCalendar() {
             dateButton.classList.add("today");
         }
 
+        const isNewlyToggled = newlyToggledDates.has(dateKey);
+
         if (reservationMode === "student") {
             const studentDateIds = new Set((draftReservations[dateKey] || []).map(Number));
             if (studentDateIds.has(selectedStudentId)) {
                 dateButton.classList.add("selected");
+            }
+            if (isNewlyToggled) {
+                dateButton.classList.add("newly-added");
+            }
+            if (dateKey === getDateKey(selectedDate)) {
+                dateButton.classList.add("current-selection");
             }
         } else if (dateKey === getDateKey(selectedDate)) {
             dateButton.classList.add("selected");
@@ -316,8 +332,10 @@ function renderReservationCalendar() {
                 const nextIds = new Set(dateValue);
                 if (nextIds.has(selectedStudentId)) {
                     nextIds.delete(selectedStudentId);
+                    newlyToggledDates.delete(dateKey);
                 } else {
                     nextIds.add(selectedStudentId);
+                    newlyToggledDates.add(dateKey);
                 }
 
                 draftReservations[dateKey] = Array.from(nextIds).sort((left, right) => left - right);
@@ -443,6 +461,7 @@ modeButtons.forEach((button) => {
 saveReservationBtn.addEventListener("click", () => {
     reservations = deepCopy(draftReservations);
     saveStorage(STORAGE_KEYS.reservations, reservations);
+    newlyToggledDates.clear();
     renderAttendance();
     saveReservationBtn.textContent = "保存しました";
     window.setTimeout(() => {

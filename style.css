@@ -362,10 +362,26 @@ body {
   color: #ffffff;
 }
 
+.weekday-row,
 .date-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 6px;
+}
+
+.weekday-row {
+  margin-bottom: 8px;
+}
+
+.weekday-cell {
+  text-align: center;
+  font-size: 12px;
+  color: #607078;
+  font-weight: 700;
+  padding: 4px 0;
+}
+
+.date-grid {
   margin-bottom: 16px;
 }
 
@@ -385,6 +401,13 @@ body {
 .date-cell.selected {
   background: #1976d2;
   color: #ffffff;
+}
+
+.date-cell.newly-added {
+  background: #fff8e1;
+  border-color: #efb100;
+  color: #8a6d00;
+  box-shadow: inset 0 0 0 2px rgba(239, 177, 0, 0.35);
 }
 
 .date-cell.today {
