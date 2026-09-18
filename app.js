@@ -114,10 +114,10 @@ function formatAttendanceDateLabel(date) {
         return `今日 (${formatDateLabel(date)}) ${weekday}`;
     }
     if (getDateKey(date) === getDateKey(yesterday)) {
-        return `前日 (${formatDateLabel(date)}) ${weekday}`;
+        return `昨日 (${formatDateLabel(date)}) ${weekday}`;
     }
     if (getDateKey(date) === getDateKey(tomorrow)) {
-        return `翌日 (${formatDateLabel(date)}) ${weekday}`;
+        return `明日 (${formatDateLabel(date)}) ${weekday}`;
     }
 
     return `${formatDateLabel(date)} ${weekday}`;
