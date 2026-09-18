@@ -35,6 +35,14 @@
                     <span id="current-date-label" class="current-date-label"></span>
                 </div>
 
+                <div class="attendance-view-switch" aria-label="表示切替">
+                    <button type="button" class="view-btn active" data-view="day">日</button>
+                    <button type="button" class="view-btn" data-view="week">週</button>
+                    <button type="button" class="view-btn" data-view="month">月</button>
+                </div>
+
+                <div id="attendance-view-content" class="attendance-view-content"></div>
+
                 <div class="attendance-panel">
                     <div class="attendance-nav">
                         <button type="button" id="prev-day-btn" class="day-nav-btn">前日</button>
@@ -63,7 +71,17 @@
                         <span id="tomorrow-date-label" class="tomorrow-date-label"></span>
                     </div>
                     <p id="tomorrow-summary" class="attendance-summary"></p>
-                    <ul id="tomorrow-reservation-list" class="reservation-list"></ul>
+                    <div class="attendance-columns tomorrow-columns">
+                        <div class="attendance-column">
+                            <h4>出席予定</h4>
+                            <ul id="tomorrow-planned-list" class="attendance-list"></ul>
+                        </div>
+
+                        <div class="attendance-column">
+                            <h4>欠席</h4>
+                            <ul id="tomorrow-absent-list" class="attendance-list"></ul>
+                        </div>
+                    </div>
                 </div>
             </section>
 
