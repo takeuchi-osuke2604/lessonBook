@@ -82,9 +82,24 @@ body {
   display: block;
 }
 
+.screen-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
 .screen h2 {
-  margin: 0 0 20px;
+  margin: 0;
   font-size: 20px;
+}
+
+.current-date-label {
+  color: #607078;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .student-panel {

@@ -17,7 +17,7 @@
 
             <nav class="tabs">
                 <button class="tab active" data-screen="attendance">
-                    本日の出欠
+                    出欠予定
                 </button>
 
                 <button class="tab" data-screen="reservation">
@@ -29,9 +29,11 @@
 
         <main>
 
-            <!-- 本日の出欠 -->
             <section id="attendance" class="screen active">
-                <h2>本日の出欠</h2>
+                <div class="screen-header">
+                    <h2>出欠予定</h2>
+                    <span id="current-date-label" class="current-date-label"></span>
+                </div>
 
                 <div class="attendance-panel">
                     <div class="attendance-nav">

@@ -47,6 +47,7 @@ const studentDateSummary = document.getElementById("student-date-summary");
 const prevDayBtn = document.getElementById("prev-day-btn");
 const nextDayBtn = document.getElementById("next-day-btn");
 const attendanceDateLabel = document.getElementById("attendance-date-label");
+const currentDateLabel = document.getElementById("current-date-label");
 
 const today = new Date();
 let currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -107,20 +108,13 @@ function formatAttendanceDateLabel(date) {
     yesterday.setDate(todayDate.getDate() - 1);
     const tomorrow = new Date(todayDate);
     tomorrow.setDate(todayDate.getDate() + 1);
-
     const weekday = formatDayOfWeekLabel(date);
 
-    if (getDateKey(date) === getDateKey(todayDate)) {
-        return `今日 (${formatDateLabel(date)}) ${weekday}`;
-    }
-    if (getDateKey(date) === getDateKey(yesterday)) {
-        return `昨日 (${formatDateLabel(date)}) ${weekday}`;
-    }
-    if (getDateKey(date) === getDateKey(tomorrow)) {
-        return `明日 (${formatDateLabel(date)}) ${weekday}`;
-    }
-
     return `${formatDateLabel(date)} ${weekday}`;
+}
+
+function formatCurrentDateLabel() {
+    return `本日：${formatDateLabel(today)}`;
 }
 
 function getStudentById(studentId) {
@@ -154,6 +148,9 @@ function renderAttendance() {
     const absentCount = reservedStudentIds.filter((studentId) => attendanceForSelectedDay[studentId] === "欠席").length;
 
     attendanceDateLabel.textContent = formatAttendanceDateLabel(attendanceDate);
+    if (currentDateLabel) {
+        currentDateLabel.textContent = formatCurrentDateLabel();
+    }
     attendanceSummary.textContent = reservedStudentIds.length
         ? `出席予定 ${plannedCount}名 / 欠席 ${absentCount}名`
         : "予約はありません。";
