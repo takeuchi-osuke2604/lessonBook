@@ -43,7 +43,6 @@ const selectedDateLabel = document.getElementById("selected-date-label");
 const reservationStudentList = document.getElementById("reservation-student-list");
 const saveReservationBtn = document.getElementById("save-reservation-btn");
 const monthNavButtons = document.querySelectorAll(".month-nav");
-const modeButtons = document.querySelectorAll(".mode-btn");
 const studentDateSummary = document.getElementById("student-date-summary");
 const prevDayBtn = document.getElementById("prev-day-btn");
 const nextDayBtn = document.getElementById("next-day-btn");
@@ -53,7 +52,6 @@ const today = new Date();
 let currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 let attendanceDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-let reservationMode = "student";
 let selectedStudentId = students[0] ? students[0].id : null;
 let newlyToggledDates = new Set();
 
@@ -309,43 +307,42 @@ function renderReservationCalendar() {
             dateButton.classList.add("today");
         }
 
-        const isNewlyToggled = newlyToggledDates.has(dateKey);
+        const savedDateIds = new Set((reservations[dateKey] || []).map(Number));
+        const studentDateIds = new Set((draftReservations[dateKey] || []).map(Number));
+        const isNewlyToggled = !savedDateIds.has(selectedStudentId) && studentDateIds.has(selectedStudentId);
 
-        if (reservationMode === "student") {
-            const studentDateIds = new Set((draftReservations[dateKey] || []).map(Number));
-            if (studentDateIds.has(selectedStudentId)) {
-                dateButton.classList.add("selected");
-            }
-            if (isNewlyToggled) {
-                dateButton.classList.add("newly-added");
-            }
-            if (dateKey === getDateKey(selectedDate)) {
-                dateButton.classList.add("current-selection");
-            }
-        } else if (dateKey === getDateKey(selectedDate)) {
+        if (studentDateIds.has(selectedStudentId)) {
             dateButton.classList.add("selected");
+        }
+        if (isNewlyToggled) {
+            dateButton.classList.add("newly-added");
+        }
+        if (dateKey === getDateKey(selectedDate)) {
+            dateButton.classList.add("current-selection");
         }
 
         dateButton.addEventListener("click", () => {
-            if (reservationMode === "student") {
-                const dateValue = draftReservations[dateKey] || [];
-                const nextIds = new Set(dateValue);
-                if (nextIds.has(selectedStudentId)) {
-                    nextIds.delete(selectedStudentId);
+            const dateValue = draftReservations[dateKey] || [];
+            const nextIds = new Set(dateValue);
+            const wasSavedSelected = (reservations[dateKey] || []).map(Number).includes(selectedStudentId);
+
+            if (nextIds.has(selectedStudentId)) {
+                nextIds.delete(selectedStudentId);
+                if (wasSavedSelected) {
                     newlyToggledDates.delete(dateKey);
                 } else {
-                    nextIds.add(selectedStudentId);
-                    newlyToggledDates.add(dateKey);
+                    newlyToggledDates.delete(dateKey);
                 }
-
-                draftReservations[dateKey] = Array.from(nextIds).sort((left, right) => left - right);
-                renderReservationCalendar();
-                renderReservationDetail();
-                return;
+            } else {
+                nextIds.add(selectedStudentId);
+                if (!wasSavedSelected) {
+                    newlyToggledDates.add(dateKey);
+                } else {
+                    newlyToggledDates.delete(dateKey);
+                }
             }
 
-            selectedDate = new Date(cellDate);
-            currentMonth = new Date(cellDate.getFullYear(), cellDate.getMonth(), 1);
+            draftReservations[dateKey] = Array.from(nextIds).sort((left, right) => left - right);
             renderReservationCalendar();
             renderReservationDetail();
         });
@@ -359,83 +356,42 @@ function renderReservationDetail() {
 
     const currentStudent = students.find((student) => student.id === selectedStudentId) || students[0];
 
-    if (reservationMode === "student") {
-        selectedDateLabel.textContent = `生徒指定: ${currentStudent ? currentStudent.name : "未選択"}`;
-        reservationStudentList.innerHTML = "";
-
-        if (studentDateSummary) {
-            const selectedDates = Object.entries(draftReservations)
-                .filter(([, ids]) => ids.includes(selectedStudentId))
-                .map(([dateKey]) => dateKey)
-                .sort();
-
-            studentDateSummary.textContent = selectedDates.length
-                ? `選択中の生徒: ${currentStudent.name} / 予約日数: ${selectedDates.length}日`
-                : `${currentStudent ? currentStudent.name : "選択中の生徒"} の予約日はまだありません。`;
-        }
-
-        const selectWrap = document.createElement("label");
-        selectWrap.className = "reservation-row";
-        selectWrap.textContent = "生徒：";
-
-        const studentSelect = document.createElement("select");
-        studentSelect.className = "reservation-student-select";
-        students.forEach((student) => {
-            const option = document.createElement("option");
-            option.value = String(student.id);
-            option.textContent = student.name;
-            option.selected = student.id === selectedStudentId;
-            studentSelect.appendChild(option);
-        });
-
-        studentSelect.addEventListener("change", (event) => {
-            selectedStudentId = Number(event.target.value);
-            renderReservationCalendar();
-            renderReservationDetail();
-        });
-
-        selectWrap.appendChild(studentSelect);
-        reservationStudentList.appendChild(selectWrap);
-        return;
-    }
-
-    const dateKey = getDateKey(selectedDate);
-    const reservedIds = new Set((draftReservations[dateKey] || []).map(Number));
-    selectedDateLabel.textContent = `${formatDateLabel(selectedDate)} の予約`;
-
-    if (studentDateSummary) {
-        studentDateSummary.textContent = "";
-    }
-
+    selectedDateLabel.textContent = `生徒指定: ${currentStudent ? currentStudent.name : "未選択"}`;
     reservationStudentList.innerHTML = "";
 
+    if (studentDateSummary) {
+        const selectedDates = Object.entries(draftReservations)
+            .filter(([, ids]) => ids.includes(selectedStudentId))
+            .map(([dateKey]) => dateKey)
+            .sort();
+
+        studentDateSummary.textContent = selectedDates.length
+            ? `選択中の生徒: ${currentStudent.name} / 予約日数: ${selectedDates.length}日`
+            : `${currentStudent ? currentStudent.name : "選択中の生徒"} の予約日はまだありません。`;
+    }
+
+    const selectWrap = document.createElement("label");
+    selectWrap.className = "reservation-row";
+    selectWrap.textContent = "生徒：";
+
+    const studentSelect = document.createElement("select");
+    studentSelect.className = "reservation-student-select";
     students.forEach((student) => {
-        const item = document.createElement("label");
-        item.className = "reservation-row";
-
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.checked = reservedIds.has(student.id);
-
-        checkbox.addEventListener("change", (event) => {
-            const nextIds = new Set(draftReservations[dateKey] || []);
-            if (event.target.checked) {
-                nextIds.add(student.id);
-            } else {
-                nextIds.delete(student.id);
-            }
-
-            draftReservations[dateKey] = Array.from(nextIds).sort((left, right) => left - right);
-        });
-
-        const name = document.createElement("span");
-        name.className = "reservation-name";
-        name.textContent = student.name;
-
-        item.appendChild(checkbox);
-        item.appendChild(name);
-        reservationStudentList.appendChild(item);
+        const option = document.createElement("option");
+        option.value = String(student.id);
+        option.textContent = student.name;
+        option.selected = student.id === selectedStudentId;
+        studentSelect.appendChild(option);
     });
+
+    studentSelect.addEventListener("change", (event) => {
+        selectedStudentId = Number(event.target.value);
+        renderReservationCalendar();
+        renderReservationDetail();
+    });
+
+    selectWrap.appendChild(studentSelect);
+    reservationStudentList.appendChild(selectWrap);
 }
 
 monthNavButtons.forEach((button) => {
@@ -449,20 +405,13 @@ monthNavButtons.forEach((button) => {
     });
 });
 
-modeButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-        reservationMode = button.dataset.mode;
-        modeButtons.forEach((item) => item.classList.toggle("active", item === button));
-        renderReservationCalendar();
-        renderReservationDetail();
-    });
-});
-
 saveReservationBtn.addEventListener("click", () => {
     reservations = deepCopy(draftReservations);
     saveStorage(STORAGE_KEYS.reservations, reservations);
     newlyToggledDates.clear();
     renderAttendance();
+    renderReservationCalendar();
+    renderReservationDetail();
     saveReservationBtn.textContent = "保存しました";
     window.setTimeout(() => {
         saveReservationBtn.textContent = "保存";
